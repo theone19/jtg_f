@@ -18,6 +18,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 /////// Manual Routes
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
+  duplicateNavigationPolicy: 'ignore',
   routes: [
     {
       path: '/',

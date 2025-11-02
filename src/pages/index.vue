@@ -155,24 +155,24 @@ export default {
       this.appStore.$state.drawer = !this.appStore.$state.drawer
     },
     async onClickLogOff() {
-      // Clear Token
-      await axios.post(apiUrl + '/users/clearToken', {
-        userId: this.appStore.loginUser.id
-      })
-      // console.log(this.appStore.loginUser)
+      // // Clear Token
+      // await axios.post(apiUrl + '/users/clearToken', {
+      //   userId: this.appStore.loginUser.id
+      // })
+      // // console.log(this.appStore.loginUser)
 
-      localStorage.removeItem(lsUserId)
-      localStorage.removeItem(lsTokenName)
-      // this.$store.state.isLogin = false
+      // localStorage.removeItem(lsUserId)
+      // localStorage.removeItem(lsTokenName)
+      // // this.$store.state.isLogin = false
 
-      // save History
-      await axios.post(apiUrl + '/users/insertHistory', {
-        userId: this.appStore.loginUser.id,
-        projectId: this.appStore.activeProject,
-        actionId: 3,
-        remark: ''
-      })
-      this.$router.push({ path: '/', replace: true })
+      // // save History
+      // await axios.post(apiUrl + '/users/insertHistory', {
+      //   userId: this.appStore.loginUser.id,
+      //   projectId: this.appStore.activeProject,
+      //   actionId: 3,
+      //   remark: ''
+      // })
+      this.$router.replace({ path: '/', replace: true })
     },
     onClickMenu(link, id) {
       this.appStore.categoryId = id
