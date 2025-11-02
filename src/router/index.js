@@ -6,11 +6,37 @@
 
 // Composables
 import { createRouter, createWebHistory } from 'vue-router'
-import { routes } from 'vue-router/auto-routes'
+// import { routes } from 'vue-router/auto-routes'
 
+
+/////// Auto Routes
+// const router = createRouter({
+//   history: createWebHistory(import.meta.env.BASE_URL),
+//   routes,
+// })
+
+/////// Manual Routes
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes,
+  routes: [
+    {
+      path: '/',
+      name: 'login',
+      component: () => import('@/pages/login.vue'),
+    },
+    {
+      path: '/home',
+      name: 'home',
+      component: () => import('@/pages/index.vue'),
+      children: [
+        {
+          path: '/dashboard',
+          name: 'dashboard',
+          component: () => import('@/pages/dashboard.vue'),
+        }
+      ]
+    },
+  ],
 })
 
 // Workaround for https://github.com/vitejs/vite/issues/11804
