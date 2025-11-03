@@ -67,6 +67,7 @@
 
 <script>
 import { useStore } from '../stores/appstore'
+import { apiUrl, imageUrl, lsUserId, lsTokenName } from '../constants.js'
 
 export default {
   async mounted() {
@@ -91,8 +92,7 @@ export default {
         ]
       }
     ],
-    // logo: imageUrl + '/system/st_logo.jpg',
-    logo: '/assets/logo.png',
+    logo: imageUrl + '/ctg_logo.jpg',    
     category: []
   }),
   methods: {
@@ -161,9 +161,10 @@ export default {
       // })
       // // console.log(this.appStore.loginUser)
 
-      // localStorage.removeItem(lsUserId)
-      // localStorage.removeItem(lsTokenName)
-      // // this.$store.state.isLogin = false
+      localStorage.removeItem(lsUserId)
+      localStorage.removeItem(lsTokenName)
+      this.appStore.userId = 0
+      this.appStore.userToken = ""
 
       // // save History
       // await axios.post(apiUrl + '/users/insertHistory', {
