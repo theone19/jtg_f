@@ -81,8 +81,8 @@ export default {
   },
   data: () => ({
     appStore: useStore(),
-    userName: isDev ? "theone" : null,
-    password: isDev ? "123456" : null,
+    userName: isDev ? "admin" : null,
+    password: isDev ? "Desper.19" : null,
     showPass: false,
     showError: false,
     errorText: "",

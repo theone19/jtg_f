@@ -15,20 +15,21 @@
               v-bind="props"
               :prepend-icon="sm.menuIcon"
               :title="sm.menuName"
+              density="compact"
             ></v-list-item>
           </template>
 
           <v-list-item
-            v-for="(sub, i) in sm.subMenu"
+            v-for="(sub, i) in sm.SubMenu"
             :key="i"
-            :title="sub.name"
-            :value="sub.name"
+            :title="sub.subMenuName"
+            :value="sub.subMenuName"            
             link
-            @click="onClickMenu(sub.route, sub.categoryId)"
-            dense
+            @click="onClickMenu(sub.subMenuRoute, sub.menuId)"
+            density="compact"
           >
             <template v-slot:title>
-              <div class="fontSize14">{{ sub.name }}</div>
+              <div class="fontSize14">{{ sub.subMenuName }}</div>
             </template>
           </v-list-item>
         </v-list-group>
@@ -68,10 +69,12 @@
 <script>
 import { useStore } from '../stores/appstore'
 import { apiUrl, imageUrl, lsUserId, lsTokenName } from '../constants.js'
+import axios from 'axios';
 
 export default {
   async mounted() {
-    this.assignMenu()
+    await this.getMenu()
+    // this.assignMenu()
     console.log('Mounted Index.vue')
   },
   data: () => ({
@@ -79,23 +82,33 @@ export default {
     drawer: null,
     selectedMenu: 0,
     open: ['Users'],
-    sideMenus: [
-      {
-        menuName: 'Menu',
-        menuIcon: 'mdi-book-open-variant',
-        subMenu: [
-          { name: 'Project', route: '/ProjectList' },
-          { name: 'รูปแบบการติดตั้ง', route: '/CategoryList' },
-          { name: 'รายการที่เลือก', route: '/CartView' },
-          { name: 'Download', route: '/DownloadGroup' },
-          { name: 'ออกจากระบบ', route: '/Logout' }
-        ]
-      }
-    ],
+    // sideMenus: [
+    //   {
+    //     menuName: 'Menu',
+    //     menuIcon: 'mdi-book-open-variant',
+    //     subMenu: [
+    //       { name: 'Project', route: '/ProjectList' },
+    //       { name: 'รูปแบบการติดตั้ง', route: '/CategoryList' },
+    //       { name: 'รายการที่เลือก', route: '/CartView' },
+    //       { name: 'Download', route: '/DownloadGroup' },
+    //       { name: 'ออกจากระบบ', route: '/Logout' }
+    //     ]
+    //   }
+    // ],
+    sideMenus: [],
     logo: imageUrl + '/ctg_logo.jpg',    
     category: []
   }),
   methods: {
+    async getMenu() {
+      try {
+        const result = await axios.get(apiUrl + '/menu/all-menus')
+        this.sideMenus = result.data
+        // console.log(result.data)
+      } catch (error) {
+        console.error('Error fetching menu:', error)
+      }
+    },
     assignMenu() {
       if (this.appStore.loginUser.user_level === '8') {
         this.sideMenus.push({
