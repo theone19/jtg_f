@@ -60,7 +60,7 @@
       <v-btn icon="mdi-exit-to-app" size="x-large" color="purple" @click="onClickLogOff()"></v-btn>
     </v-app-bar>
 
-    <v-main>
+    <v-main class="bg-blue-grey-lighten-5">
       <router-view></router-view>
     </v-main>
   </v-app>
