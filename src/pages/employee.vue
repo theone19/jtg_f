@@ -1,131 +1,452 @@
 <template>
-  <v-container>
-    <v-card class="mx-auto" max-width="800">
-      <v-card-title class="text-h5 font-weight-bold">
-        🖼️ Image Resizer & Base64 Converter
+  <v-container class="pa-5" fluid>
+    <v-card color="#ffffff">
+      <v-card-title class="d-flex align-center pe-2">
+        <v-icon icon="mdi-account-outline"></v-icon> &nbsp; ข้อมุลพนักงาน
+
+        <v-spacer></v-spacer>
+
+        <v-text-field
+          v-model="search"
+          density="compact"
+          label="ค้นหา"
+          prepend-inner-icon="mdi-magnify"
+          variant="solo-filled"
+          flat
+          hide-details
+          single-line
+        ></v-text-field>
+
+        <v-btn class="bg-green mr-3 ml-5" @click="insertEmployee()"
+          >New <v-icon icon="mdi-plus" end></v-icon
+        ></v-btn>
       </v-card-title>
-      <v-card-subtitle>
-        Upload an image, it will be resized and converted to Base64 format.
-      </v-card-subtitle>
 
       <v-divider></v-divider>
 
-      <v-progress-linear
-        v-if="isProcessing"
-        :value="uploadProgress"
-        color="primary"
-        height="20"
-        striped
-        stream
+      <v-data-table
+        :headers="headers"
+        :items="employee"
+        :search="search"
+        class="elevation-10"
       >
-        <template v-slot:default>
-          <strong>{{ Math.ceil(uploadProgress) }}%</strong>
+        <template
+          v-slot:headers="{ columns, isSorted, getSortIcon, toggleSort }"
+        >
+          <tr class="bg-blue-lighten-5 fontPrompt fontSize14">
+            <template v-for="column in columns" :key="column.key">
+              <th>
+                <div class="d-flex align-center">
+                  <span
+                    class="me-2 cursor-pointer"
+                    @click="toggleSort(column)"
+                    v-text="column.title"
+                  ></span>
+                  <v-icon
+                    v-if="isSorted(column)"
+                    :icon="getSortIcon(column)"
+                    color="medium-emphasis"
+                  ></v-icon>
+                </div>
+              </th>
+            </template>
+          </tr>
         </template>
-      </v-progress-linear>
 
-      <v-card-text>
-        <v-file-input
-          v-model="originalImageFile"
-          label="Select an image"
-          accept="image/png, image/jpeg, image/gif"
-          prepend-icon="mdi-camera"
-          outlined
-          dense
-          :disabled="isProcessing"
-          :loading="isProcessing"
-          @change="handleFileUpload"
-        ></v-file-input>
+        <template v-slot:item="{ item }">
+          <tr class="fontSarabun fontSize14">
+            <td>
+              <v-icon
+                size="small"
+                class="me-2"
+                @click="editItem(item.employeeId)"
+                color="blue"
+              >
+                mdi-pencil
+              </v-icon>
+            </td>
+            <td>{{ item.fullName }}</td>
+            <td>{{ item.departmentName }}</td>
+            <td>{{ item.jobTitle }}</td>
+            <td>{{ item.phoneNumber }}</td>
+            <td>
+              <v-img
+                v-if="item.empPicture"
+                :src="item.empPicture"
+                aspect-ratio="1"
+                class="grey lighten-2"
+                max-height="100"
+                max-width="100"
+                contain
+              >
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular
+                      indeterminate
+                      color="grey lighten-5"
+                    ></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
+            </td>
+            <td>
+              <v-icon
+                size="small"
+                @click="deleteItem(item.employeeId, item.fullName)"
+                color="red"
+              >
+                mdi-trash-can-outline
+              </v-icon>
+            </td>
+          </tr>
+        </template>
+      </v-data-table>
 
-        <v-row v-if="originalImageUrl || resizedBase64">
-          <v-col cols="12" md="6">
-            <h3 class="mb-2">Original Image</h3>
-            <v-img
-              v-if="originalImageUrl"
-              :src="originalImageUrl"
-              aspect-ratio="1"
-              class="grey lighten-2"
-              max-height="300"
-              contain
+      <!------------------------- dialog ADD --------------------------->
+      <v-dialog v-model="dialog" persistent max-width="800px">
+        <v-card>
+          <v-card-title>
+            <span class="fontPromptBold fontSize24 text-blue-darken-3"
+              >ข้อมูลพนักงาน</span
             >
-              <template v-slot:placeholder>
-                <v-row class="fill-height ma-0" align="center" justify="center">
-                  <v-progress-circular
-                    indeterminate
-                    color="grey lighten-5"
-                  ></v-progress-circular>
+          </v-card-title>
+          <v-card-text class="mt-2">
+            <v-form ref="form1">
+              <v-container>
+                <v-row>
+                  <v-col>
+                    <v-text-field
+                      v-model="employeeData.firstName"
+                      label="ชื่อ"
+                      :rules="[(v) => !!v || 'กรุณาป้อนชื่อ']"
+                      variant="outlined"
+                      density="compact"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col>
+                    <v-text-field
+                      v-model="employeeData.lastName"
+                      label="นามสกุล"
+                      :rules="[(v) => !!v || 'กรุณาป้อนนามสกุล']"
+                      variant="outlined"
+                      density="compact"
+                    ></v-text-field>
+                  </v-col>
                 </v-row>
-              </template>
-            </v-img>
-          </v-col>
+                <v-row class="mt-n5">
+                  <v-col>
+                    <v-text-field
+                      v-model="employeeData.email"
+                      label="อีเมล"
+                      :rules="[(v) => !!v || 'กรุณาป้อนอีเมล']"
+                      variant="outlined"
+                      density="compact"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col>
+                    <v-text-field
+                      v-model="employeeData.phoneNumber"
+                      label="เบอร์โทรศัพท์"
+                      :rules="[(v) => !!v || 'กรุณาป้อนเบอร์โทรศัพท์']"
+                      variant="outlined"
+                      density="compact"
+                    ></v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row class="mt-n5">
+                  <v-col>
+                    <v-autocomplete
+                      v-model="employeeData.departmentId"
+                      label="แผนก"
+                      :items="department"
+                      item-title="departmentName"
+                      item-value="departmentId"
+                      variant="outlined"
+                      density="compact"
+                      :rules="[(v) => !!v || 'กรุณาเลือกแผนก']"
+                    ></v-autocomplete>
+                  </v-col>
+                  <v-col>
+                    <v-text-field
+                      v-model="employeeData.jobTitle"
+                      label="ตำแหน่งงาน"
+                      :rules="[(v) => !!v || 'กรุณาป้อนตำแหน่งงาน']"
+                      variant="outlined"
+                      density="compact"
+                    ></v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col>
+                    <v-file-input
+                      v-model="employeeData.empPicture"
+                      label="เลือกรูปภาพพนักงาน"
+                      accept="image/png, image/jpeg, image/gif"
+                      prepend-icon="mdi-camera"
+                      variant="outlined"
+                      density="compact"
+                      :disabled="isProcessing"
+                      :loading="isProcessing"
+                      @change="handleFileUpload"
+                    ></v-file-input>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col>
+                    <v-img
+                      v-if="resizedBase64"
+                      :src="resizedBase64"
+                      aspect-ratio="1"
+                      class="grey lighten-2"
+                      max-height="300"
+                      contain
+                    >
+                      <template v-slot:placeholder>
+                        <v-row
+                          class="fill-height ma-0"
+                          align="center"
+                          justify="center"
+                        >
+                          <v-progress-circular
+                            indeterminate
+                            color="grey lighten-5"
+                          ></v-progress-circular>
+                        </v-row>
+                      </template>
+                    </v-img>
+                  </v-col>
+                </v-row>
+              </v-container>
+            </v-form>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="green darken-1" class="mr-3" text @click="onSave()">
+              บันทึก <v-icon icon="mdi-content-save" end></v-icon
+            ></v-btn>
+            <v-btn color="red darken-1" text @click="dialog = false">
+              ปิด <v-icon icon="mdi-close" end></v-icon
+            ></v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
 
-          <v-col cols="12" md="6">
-            <h3 class="mb-2">Resized Image (Preview)</h3>
-            <v-img
-              v-if="resizedBase64"
-              :src="resizedBase64"
-              aspect-ratio="1"
-              class="grey lighten-2"
-              max-height="300"
-              contain
+      <!------------------------- dialog Delete --------------------------->
+      <v-dialog v-model="dialogDelete" max-width="300">
+        <v-card class="mx-auto">
+          <!-- <v-card-title class="text-red text-center mt-1 mr-8 ml-8"
+            ><div class="fontSize16 mb-3">ต้องการลบ</div>
+            <div class="text-blue fontSize18">{{ deleteText }}</div>
+            <div class="fontSize16 mt-3">ใช่หรือไม่ ?</div></v-card-title
+          > -->
+          <v-card-title class="text-red text-center mt-1 mr-8 ml-8"
+            ><span class="fontSize16 mr-3">ต้องการลบ</span>
+            <span class="text-blue fontSize18">{{ deleteText }}</span>
+            <span class="fontSize16 ml-3">ใช่หรือไม่ ?</span></v-card-title
+          >
+          <v-card-actions class="mt-3 mb-1">
+            <v-spacer></v-spacer>
+            <v-btn
+              color="green-darken-1"
+              variant="outlined"
+              @click="deleteItemConfirm()"
+              >ยืนยัน</v-btn
             >
-               <template v-slot:placeholder>
-                <v-row class="fill-height ma-0" align="center" justify="center">
-                  <v-progress-circular
-                    indeterminate
-                    color="grey lighten-5"
-                  ></v-progress-circular>
-                </v-row>
-              </template>
-            </v-img>
-          </v-col>
-        </v-row>
-      </v-card-text>
-
-      <div v-if="resizedBase64">
-        <v-divider></v-divider>
-        <v-card-text>
-            <h3 class="mb-2">✨ Base64 Result</h3>
-          <v-textarea
-            v-model="resizedBase64"
-            label="Base64 String"
-            readonly
-            auto-grow
-            outlined
-            rows="5"
-          ></v-textarea>
-        </v-card-text>
-      </div>
-
+            <v-btn
+              color="orange-darken-1"
+              variant="outlined"
+              @click="dialogDelete = false"
+              >ยกเลิก</v-btn
+            >
+            <v-spacer></v-spacer>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </v-card>
   </v-container>
 </template>
 
 <script>
+import axios from "axios";
+import { apiUrl } from "../constants";
+
 export default {
-  name: 'ImageUploader',
-  data() {
-    return {
-      // Configurable options
-      maxWidth: 800,
-      maxHeight: 800,
-      imageQuality: 0.8,
-
-      // Component state
-      originalImageFile: null,
-      originalImageUrl: null,
-      resizedBase64: null,
-
-      // STATE เพิ่มใหม่: สำหรับ Progress
-      isProcessing: false,     // สถานะว่ากำลังประมวลผลไฟล์หรือไม่
-      uploadProgress: 0,       // เปอร์เซ็นต์ความคืบหน้า (0-100)
-    };
+  name: "EmployeePage",
+  async mounted() {
+    await this.getDepartment();
+    await this.getEmployee();
   },
+  data: () => ({
+    employee: [],
+    employeeData: {
+      namePrefix: null,
+      firstName: null,
+      lastName: null,
+      email: null,
+      phoneNumber: null,
+      hireDate: new Date(),
+      jobTitle: null,
+      departmentId: null,
+      birthDate: new Date(),
+      idCardNumber: null,
+      address: null,
+      salary: null,
+      remarks: null,
+      isWorking: true,
+      empPicture: "",
+    },
+    headers: [
+      {
+        title: "",
+        key: "edit",
+        sortable: false,
+      },
+      {
+        key: "fullName",
+        title: "ชื่อ",
+      },
+      {
+        key: "deartmentName",
+        title: "แผนก",
+      },
+      {
+        key: "jobTitle",
+        title: "ตำแหน่งงาน",
+      },
+      {
+        key: "phoneNumber",
+        title: "โทรศัพท์",
+      },
+      {
+        key: "empPicture",
+        title: "รูปภาพ",
+      },
+      {
+        title: "",
+        key: "delete",
+        sortable: false,
+      },
+    ],
+    department: [],
+    dialog: false,
+    dialogDelete: false,
+    editMode: false,
+    deleteId: 0,
+    deleteText: "",
+    search: "",
+    // Configurable options
+    maxWidth: 800,
+    maxHeight: 1200,
+    imageQuality: 0.8,
+    // Component state
+    originalImageFile: null,
+    originalImageUrl: null,
+    resizedBase64: null,
+    // STATE เพิ่มใหม่: สำหรับ Progress
+    isProcessing: false, // สถานะว่ากำลังประมวลผลไฟล์หรือไม่
+    uploadProgress: 0, // เปอร์เซ็นต์ความคืบหน้า (0-100)
+  }),
   methods: {
+    async getDepartment() {
+      try {
+        let result = await axios.get(apiUrl + "/department");
+        this.department = result.data;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async getEmployee() {
+      try {
+        let result = await axios.get(apiUrl + "/employee/all");
+        this.employee = result.data;
+        // console.log(this.employee);
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    insertEmployee() {
+      this.editMode = false;
+      this.employeeData.namePrefix = "";
+      this.employeeData.firstName = "";
+      this.employeeData.lastName = "";
+      this.employeeData.email = "";
+      this.employeeData.phoneNumber = "";
+      this.employeeData.hireDate = new Date();
+      this.employeeData.jobTitle = "";
+      this.employeeData.departmentId = null;
+      this.employeeData.birthDate = new Date();
+      this.employeeData.idCardNumber = "";
+      this.employeeData.address = "";
+      this.employeeData.salary = 0;
+      this.employeeData.remarks = "";
+      this.employeeData.isWorking = true;
+      this.employeeData.empPicture = null;
+      this.dialog = true;
+    },
+    async onSave() {
+      const { valid } = await this.$refs.form1.validate();
+      // console.log("Form valid:", valid);
+
+      if (valid) {
+        if (this.editMode == false) {
+          try {
+            this.employeeData.empPicture = null;
+            this.employeeData.imageData = this.resizedBase64;
+            const result = await axios.post(
+              apiUrl + "/employee/createpic",
+              this.employeeData
+            );
+            // console.log(result.data);
+          } catch (error) {
+            console.log(error);
+          }
+        } else {
+          try {
+            await axios.put(
+              apiUrl + "/department/update/" + this.departmentData.departmentId,
+              this.departmentData
+            );
+          } catch (error) {
+            console.log(error);
+          }
+        }
+        await this.getDepartment();
+        this.dialog = false;
+      }
+    },
+    async editItem(id) {
+      try {
+        let result = await axios.get(apiUrl + "/department/by-id/" + id);
+        this.departmentData = result.data;
+        this.editMode = true;
+        this.dialog = true;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    deleteItem(id, name) {
+      this.deleteId = id;
+      this.deleteText = name;
+      this.dialogDelete = true;
+    },
+    async deleteItemConfirm() {
+      try {
+        await axios.delete(apiUrl + "/employee/delete/" + this.deleteId);
+      } catch (error) {
+        console.log(error);
+      }
+      await this.getEmployee();
+      this.dialogDelete = false;
+    },
     handleFileUpload() {
-      const file = this.originalImageFile;
+      const file = this.employeeData.empPicture;
 
       if (!file) {
-        this.originalImageUrl = null;
+        this.employeeData.empPicture = null;
         this.resizedBase64 = null;
         return;
       }
@@ -134,14 +455,14 @@ export default {
       this.isProcessing = true;
       this.uploadProgress = 0;
       this.resizedBase64 = null; // เคลียร์ผลลัพธ์เก่า
-      
+
       this.originalImageUrl = URL.createObjectURL(file);
       this.resizeAndEncodeImage(file);
     },
 
     resizeAndEncodeImage(file) {
       const reader = new FileReader();
-      
+
       // LOGIC เพิ่มใหม่: ติดตามความคืบหน้าการอ่านไฟล์
       reader.onprogress = (event) => {
         if (event.lengthComputable) {
@@ -150,16 +471,16 @@ export default {
           this.uploadProgress = percentComplete;
         }
       };
-      
+
       reader.onload = (event) => {
         this.uploadProgress = 100; // เมื่ออ่านเสร็จ ให้เต็ม 100%
         const img = new Image();
         img.src = event.target.result;
 
         img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+
           let width = img.width;
           let height = img.height;
 
@@ -179,22 +500,25 @@ export default {
           canvas.height = height;
 
           ctx.drawImage(img, 0, 0, width, height);
-          
-          this.resizedBase64 = canvas.toDataURL('image/jpeg', this.imageQuality);
+
+          this.resizedBase64 = canvas.toDataURL(
+            "image/jpeg",
+            this.imageQuality
+          );
 
           // สิ้นสุดกระบวนการ
-          this.isProcessing = false; 
+          this.isProcessing = false;
         };
 
         img.onerror = (error) => {
-            console.error("Error loading image:", error);
-            this.isProcessing = false; // หยุดเมื่อมี error
+          console.error("Error loading image:", error);
+          this.isProcessing = false; // หยุดเมื่อมี error
         };
       };
-      
+
       reader.onerror = (error) => {
-          console.error("Error reading file:", error);
-          this.isProcessing = false; // หยุดเมื่อมี error
+        console.error("Error reading file:", error);
+        this.isProcessing = false; // หยุดเมื่อมี error
       };
 
       // เริ่มอ่านไฟล์
@@ -205,8 +529,7 @@ export default {
 </script>
 
 <style scoped>
-h3 {
-  color: #555;
-  font-weight: 500;
+.v-data-table >>> .v-data-table-header {
+  background-color: #f3a6a6 !important; /* Replace with your desired color */
 }
 </style>

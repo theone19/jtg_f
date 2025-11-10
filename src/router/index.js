@@ -17,7 +17,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 /////// Manual Routes
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory('/ctg/'),       // ต้องใส่เพื่อให้ path ถูกต้องเมื่อเอาขึ้น server
   duplicateNavigationPolicy: 'ignore',
   routes: [
     {

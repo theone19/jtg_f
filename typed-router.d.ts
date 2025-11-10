@@ -20,6 +20,7 @@ declare module 'vue-router/auto-routes' {
   export interface RouteNamedMap {
     '/': RouteRecordInfo<'/', '/', Record<never, never>, Record<never, never>>,
     '/_blank': RouteRecordInfo<'/_blank', '/_blank', Record<never, never>, Record<never, never>>,
+    '/_tetsImageUpload': RouteRecordInfo<'/_tetsImageUpload', '/_tetsImageUpload', Record<never, never>, Record<never, never>>,
     '/dashboard': RouteRecordInfo<'/dashboard', '/dashboard', Record<never, never>, Record<never, never>>,
     '/department': RouteRecordInfo<'/department', '/department', Record<never, never>, Record<never, never>>,
     '/employee': RouteRecordInfo<'/employee', '/employee', Record<never, never>, Record<never, never>>,
@@ -43,6 +44,10 @@ declare module 'vue-router/auto-routes' {
     }
     'src/pages/_blank.vue': {
       routes: '/_blank'
+      views: never
+    }
+    'src/pages/_tetsImageUpload.vue': {
+      routes: '/_tetsImageUpload'
       views: never
     }
     'src/pages/dashboard.vue': {
