@@ -74,9 +74,9 @@
                 v-if="item.empPicture"
                 :src="item.empPicture"
                 aspect-ratio="1"
-                class="grey lighten-2"
+                class="grey lighten-2 py-2"
                 max-height="100"
-                max-width="100"
+                max-width="80"
                 contain
               >
                 <template v-slot:placeholder>
@@ -85,10 +85,18 @@
                     align="center"
                     justify="center"
                   >
-                    <v-progress-circular
+                    <!-- <v-progress-circular
                       indeterminate
                       color="grey lighten-5"
-                    ></v-progress-circular>
+                    ></v-progress-circular> -->
+                    <v-img
+                      :src="nopic"
+                      aspect-ratio="1"
+                      class="grey lighten-2 py-2"
+                      max-height="100"
+                      max-width="80"
+                      contain
+                    ></v-img>
                   </v-row>
                 </template>
               </v-img>
@@ -272,7 +280,7 @@
 
 <script>
 import axios from "axios";
-import { apiUrl } from "../constants";
+import { apiUrl, imageUrl } from "../constants";
 
 export default {
   name: "EmployeePage",
@@ -308,6 +316,7 @@ export default {
       {
         key: "fullName",
         title: "ชื่อ",
+        align: "center",
       },
       {
         key: "deartmentName",
@@ -349,6 +358,7 @@ export default {
     // STATE เพิ่มใหม่: สำหรับ Progress
     isProcessing: false, // สถานะว่ากำลังประมวลผลไฟล์หรือไม่
     uploadProgress: 0, // เปอร์เซ็นต์ความคืบหน้า (0-100)
+    nopic: imageUrl + "/nopic.jpg",
   }),
   methods: {
     async getDepartment() {
@@ -363,6 +373,13 @@ export default {
       try {
         let result = await axios.get(apiUrl + "/employee/all");
         this.employee = result.data;
+        for (let i = 0; i < this.employee.length; i++) {
+          if (!!!this.employee[i].empPicture)
+            this.employee[i].empPicture = null;
+          else
+            this.employee[i].empPicture =
+              imageUrl + "/" + this.employee[i].empPicture;
+        }
         // console.log(this.employee);
       } catch (error) {
         console.log(error);
@@ -414,7 +431,7 @@ export default {
             console.log(error);
           }
         }
-        await this.getDepartment();
+        await this.getEmployee();
         this.dialog = false;
       }
     },
