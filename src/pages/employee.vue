@@ -114,7 +114,7 @@
         </template>
       </v-data-table>
 
-      <!------------------------- dialog ADD --------------------------->
+      <!------------------------- dialog ADD / EDIT --------------------------->
       <v-dialog v-model="dialog" persistent max-width="800px">
         <v-card>
           <v-card-title>
@@ -305,7 +305,7 @@ export default {
       salary: null,
       remarks: null,
       isWorking: true,
-      empPicture: "",
+      empPicture: null,
     },
     headers: [
       {
@@ -402,6 +402,7 @@ export default {
       this.employeeData.remarks = "";
       this.employeeData.isWorking = true;
       this.employeeData.empPicture = null;
+      this.resizedBase64 = null;
       this.dialog = true;
     },
     async onSave() {
@@ -437,8 +438,19 @@ export default {
     },
     async editItem(id) {
       try {
-        let result = await axios.get(apiUrl + "/department/by-id/" + id);
-        this.departmentData = result.data;
+        let result = await axios.get(apiUrl + "/employee/by-id/" + id);
+        this.employeeData = result.data;
+        if (!!!this.employeeData.empPicture) {
+          this.employeeData.empPicture = null;
+          this.resizedBase64 = null;
+        } else {
+          // this.employeeData.empPicture =
+          //   imageUrl + this.employeeData.empPicture;
+          this.resizedBase64 = await this.imageUrlToBase64(
+            imageUrl + this.employeeData.empPicture
+          );
+        }
+        console.log(this.employeeData);
         this.editMode = true;
         this.dialog = true;
       } catch (error) {
@@ -540,6 +552,27 @@ export default {
 
       // เริ่มอ่านไฟล์
       reader.readAsDataURL(file);
+    },   
+    async imageUrlToBase64(url) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "Anonymous"; // เพื่อหลีกเลี่ยงปัญหา CORS
+        img.src = url;
+
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0);
+          const dataURL = canvas.toDataURL("image/png");
+          resolve(dataURL);
+        };
+
+        img.onerror = (error) => {
+          reject(error);
+        };
+      });
     },
   },
 };

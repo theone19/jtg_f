@@ -5,11 +5,17 @@
         <v-row align="center" justify="center">
           <v-col cols="12" sm="8" md="4">
             <v-card class="elevation-6">
-              <v-toolbar color="green" align="center" dark flat>
+              <!-- <v-toolbar color="green" align="center" dark flat>
                 <v-toolbar-title class="fontPrompt"
-                  >ChomThong Gold Business</v-toolbar-title
+                  >
+                  <v-img :src="logo" alt="Logo" contain max-width="100" max-height="100"></v-img>
+                  <div>ChomThong Gld Business</div></v-toolbar-title
                 >
-              </v-toolbar>
+              </v-toolbar> -->
+              <v-card-title class="fontPrompt12 justify-center text-h5 text--primary py-5" align="center">
+                <v-img :src="logo" alt="Logo" contain max-width="150" max-height="150"></v-img>
+                <div class="pt-4 text-orange-darken-2">ระบบบริหารจัดการธุรกิจจอมทองโกลด์</div>
+              </v-card-title>
               <v-card-text class="mt-5">
                 <v-form ref="form" @submit.prevent="login()">
                   <v-text-field
@@ -69,7 +75,7 @@
 
 <script>
 import { useStore } from "../stores/appstore";
-import { isDev, apiUrl, lsTokenName, lsUserId } from "../constants.js";
+import { isDev, apiUrl, imageUrl, lsTokenName, lsUserId } from "../constants.js";
 import axios from "axios";
 
 export default {
@@ -86,6 +92,7 @@ export default {
     showPass: false,
     showError: false,
     errorText: "",
+    logo: imageUrl + '/ctg_logo1.jpg',    
   }),
   methods: {
     async login() {
