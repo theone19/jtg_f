@@ -3,7 +3,7 @@
     <v-card color="#FFFFFF">
       
       <v-card-title class="d-flex align-center pe-2">
-        <v-icon icon="mdi-account-outline"></v-icon> &nbsp; ข้อมูลแผนก
+        <v-icon icon="mdi-account-outline"></v-icon> &nbsp; ประเภทสินค้า
 
         <v-spacer></v-spacer>
 
@@ -18,7 +18,7 @@
           single-line
         ></v-text-field>
 
-        <v-btn class="bg-green mr-3 ml-5" @click="insertDepartment()"
+        <v-btn class="bg-green mr-3 ml-5" @click="insertProductType()"
           >New <v-icon icon="mdi-plus" end></v-icon
         ></v-btn>
       </v-card-title>
@@ -27,7 +27,7 @@
 
       <v-data-table
         :headers="headers"
-        :items="department"
+        :items="productType"
         :search="search"
         class="elevation-10"
       >
@@ -68,18 +68,18 @@
               <v-icon
                 size="small"
                 class="ml-3"
-                @click="editItem(item.departmentId)"
+                @click="editItem(item.productTypeId)"
                 color="blue"
               >
                 mdi-pencil
               </v-icon>
             </td>
-            <td>{{ item.departmentName }}</td>
+            <td>{{ item.productTypeName }}</td>
             <!-- <td>Test</td> -->
             <td>
               <v-icon
                 size="small"
-                @click="deleteItem(item.departmentId, item.departmentName)"
+                @click="deleteItem(item.productTypeId, item.productTypeName)"
                 color="red"
               >
                 mdi-trash-can-outline
@@ -94,7 +94,7 @@
         <v-card>
           <v-card-title class="bg-blue-lighten-4 text-center">
             <span class="fontPromptBold fontSize24 text-blue-darken-3"
-              >ข้อมูลแผนก</span
+              >ข้อมูลประเภทสินค้า</span
             >
           </v-card-title>
           <v-card-text class="mt-2">
@@ -103,9 +103,9 @@
                 <v-row>
                   <v-col>
                     <v-text-field
-                      v-model="departmentData.departmentName"
-                      label="ชื่อแผนก"
-                      :rules="[(v) => !!v || 'กรุณาป้อนชื่อแผนก']"
+                      v-model="productTypeData.productTypeName"
+                      label="ชื่อประเภทสินค้า"
+                      :rules="[(v) => !!v || 'กรุณาป้อนชื่อประเภทสินค้า']"
                       variant="outlined"
                       density="compact"
                     ></v-text-field>
@@ -161,14 +161,14 @@ import axios from "axios";
 import { apiUrl } from "../constants";
 
 export default {
-  name: "DepartmentPage",
+  name: "ProductTypePage",
   async mounted() {
-    await this.getDepartment();
+    await this.getProductType();
   },
   data: () => ({
-    department: [],
-    departmentData: {
-      departmentName: "",
+    productType: [],
+    productTypeData: {
+      productTypeName: "",
     },
     headers: [
       {
@@ -177,8 +177,8 @@ export default {
         sortable: false,
       },
       {
-        key: "departmentName",
-        title: "ชื่อแผนก",
+        key: "productTypeName",
+        title: "ประเภทสินค้า",
       },
       {
         title: "",
@@ -194,17 +194,17 @@ export default {
     search: "",
   }),
   methods: {
-    async getDepartment() {
+    async getProductType() {
       try {
-        let result = await axios.get(apiUrl + "/department");
-        this.department = result.data;
+        let result = await axios.get(apiUrl + "/product-type");
+        this.productType = result.data;
       } catch (error) {
         console.log(error);
       }
     },
-    insertDepartment() {
+    insertProductType() {
       this.editMode = false;
-      this.departmentData.departmentName = "";
+      this.productTypeData.productTypeName = "";
       this.dialog = true;
     },
     async onSave() {
@@ -214,8 +214,8 @@ export default {
         if (this.editMode == false) {
           try {            
             const result = await axios.post(
-              apiUrl + "/department/create",
-              this.departmentData
+              apiUrl + "/product-type/create",
+              this.productTypeData
             );
           } catch (error) {
             console.log(error);
@@ -223,21 +223,21 @@ export default {
         } else {
           try {            
             await axios.put(
-              apiUrl + "/department/update/" + this.departmentData.departmentId,
-              this.departmentData
+              apiUrl + "/product-type/update/" + this.productTypeData.productTypeId,
+              this.productTypeData
             );
           } catch (error) {
             console.log(error);
           }
         }
-        await this.getDepartment();
+        await this.getProductType();
         this.dialog = false;
       }
     },
     async editItem(id) {
       try {
-        let result = await axios.get(apiUrl + "/department/by-id/" + id);
-        this.departmentData = result.data;
+        let result = await axios.get(apiUrl + "/product-type/by-id/" + id);
+        this.productTypeData = result.data;
         this.editMode = true;
         this.dialog = true;
       } catch (error) {
@@ -251,11 +251,11 @@ export default {
     },
     async deleteItemConfirm() {
       try {        
-        await axios.delete(apiUrl + "/department/delete/" + this.deleteId);
+        await axios.delete(apiUrl + "/product-type/delete/" + this.deleteId);
       } catch (error) {
         console.log(error);
       }
-      await this.getDepartment();
+      await this.getProductType();
       this.dialogDelete = false;
     },
   },

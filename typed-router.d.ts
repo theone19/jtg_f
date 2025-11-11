@@ -21,10 +21,14 @@ declare module 'vue-router/auto-routes' {
     '/': RouteRecordInfo<'/', '/', Record<never, never>, Record<never, never>>,
     '/_blank': RouteRecordInfo<'/_blank', '/_blank', Record<never, never>, Record<never, never>>,
     '/_tetsImageUpload': RouteRecordInfo<'/_tetsImageUpload', '/_tetsImageUpload', Record<never, never>, Record<never, never>>,
+    '/customer': RouteRecordInfo<'/customer', '/customer', Record<never, never>, Record<never, never>>,
     '/dashboard': RouteRecordInfo<'/dashboard', '/dashboard', Record<never, never>, Record<never, never>>,
     '/department': RouteRecordInfo<'/department', '/department', Record<never, never>, Record<never, never>>,
     '/employee': RouteRecordInfo<'/employee', '/employee', Record<never, never>, Record<never, never>>,
     '/login': RouteRecordInfo<'/login', '/login', Record<never, never>, Record<never, never>>,
+    '/metalType': RouteRecordInfo<'/metalType', '/metalType', Record<never, never>, Record<never, never>>,
+    '/productType': RouteRecordInfo<'/productType', '/productType', Record<never, never>, Record<never, never>>,
+    '/unitType': RouteRecordInfo<'/unitType', '/unitType', Record<never, never>, Record<never, never>>,
   }
 
   /**
@@ -50,6 +54,10 @@ declare module 'vue-router/auto-routes' {
       routes: '/_tetsImageUpload'
       views: never
     }
+    'src/pages/customer.vue': {
+      routes: '/customer'
+      views: never
+    }
     'src/pages/dashboard.vue': {
       routes: '/dashboard'
       views: never
@@ -64,6 +72,18 @@ declare module 'vue-router/auto-routes' {
     }
     'src/pages/login.vue': {
       routes: '/login'
+      views: never
+    }
+    'src/pages/metalType.vue': {
+      routes: '/metalType'
+      views: never
+    }
+    'src/pages/productType.vue': {
+      routes: '/productType'
+      views: never
+    }
+    'src/pages/unitType.vue': {
+      routes: '/unitType'
       views: never
     }
   }

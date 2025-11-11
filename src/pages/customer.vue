@@ -3,7 +3,7 @@
     <v-card color="#FFFFFF">
       
       <v-card-title class="d-flex align-center pe-2">
-        <v-icon icon="mdi-account-outline"></v-icon> &nbsp; ข้อมูลแผนก
+        <v-icon icon="mdi-account-outline"></v-icon> &nbsp; ข้อมูลลูกค้า
 
         <v-spacer></v-spacer>
 
@@ -18,7 +18,7 @@
           single-line
         ></v-text-field>
 
-        <v-btn class="bg-green mr-3 ml-5" @click="insertDepartment()"
+        <v-btn class="bg-green mr-3 ml-5" @click="insertCustomer()"
           >New <v-icon icon="mdi-plus" end></v-icon
         ></v-btn>
       </v-card-title>
@@ -27,7 +27,7 @@
 
       <v-data-table
         :headers="headers"
-        :items="department"
+        :items="customer"
         :search="search"
         class="elevation-10"
       >
@@ -68,18 +68,23 @@
               <v-icon
                 size="small"
                 class="ml-3"
-                @click="editItem(item.departmentId)"
+                @click="editItem(item.customerId)"
                 color="blue"
               >
                 mdi-pencil
               </v-icon>
             </td>
-            <td>{{ item.departmentName }}</td>
+            <td>{{ item.customerName }}</td>
+            <td>{{ item.contactName }}</td>
+            <td>{{ item.address }}</td>
+            <td>{{ item.city }}</td>
+            <td>{{ item.postalCode }}</td>            
+            <td>{{ item.phone }}</td>
             <!-- <td>Test</td> -->
             <td>
               <v-icon
                 size="small"
-                @click="deleteItem(item.departmentId, item.departmentName)"
+                @click="deleteItem(item.customerId, item.customerName)"
                 color="red"
               >
                 mdi-trash-can-outline
@@ -94,7 +99,7 @@
         <v-card>
           <v-card-title class="bg-blue-lighten-4 text-center">
             <span class="fontPromptBold fontSize24 text-blue-darken-3"
-              >ข้อมูลแผนก</span
+              >ข้อมูลลูกค้า</span
             >
           </v-card-title>
           <v-card-text class="mt-2">
@@ -103,9 +108,60 @@
                 <v-row>
                   <v-col>
                     <v-text-field
-                      v-model="departmentData.departmentName"
-                      label="ชื่อแผนก"
-                      :rules="[(v) => !!v || 'กรุณาป้อนชื่อแผนก']"
+                      v-model="customerData.customerName"
+                      label="ชื่อลูกค้า"
+                      :rules="[(v) => !!v || 'กรุณาป้อนชื่อลูกค้า']"
+                      variant="outlined"
+                      density="compact"
+                    ></v-text-field>
+                  </v-col>                  
+                </v-row>
+                <v-row class="my-n4">
+                  <v-col>
+                    <v-text-field
+                      v-model="customerData.contactName"
+                      label="ชื่อผู้ติดต่อ"
+                      :rules="[(v) => !!v || 'กรุณาป้อนชื่อผู้ติดต่อ']"
+                      variant="outlined"
+                      density="compact"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col>
+                    <v-text-field
+                      v-model="customerData.phone"
+                      label="โทรศัพท์"
+                      :rules="[(v) => !!v || 'กรุณาป้อนโทรศัพท์']"
+                      variant="outlined"
+                      density="compact"
+                    ></v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row class="my-n4">
+                  <v-col>
+                    <v-textarea
+                      v-model="customerData.address"
+                      label="ที่อยู่"
+                      :rules="[(v) => !!v || 'กรุณาป้อนที่อยู่']"
+                      variant="outlined"
+                      density="compact"
+                    ></v-textarea>
+                  </v-col>
+                </v-row>
+                <v-row class="my-n4">
+                  <v-col>
+                    <v-text-field
+                      v-model="customerData.city"
+                      label="จังหวัด"
+                      :rules="[(v) => !!v || 'กรุณาป้อนจังหวัด']"
+                      variant="outlined"
+                      density="compact"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col>
+                    <v-text-field
+                      v-model="customerData.postalCode"
+                      label="รหัสไปรษณีย์"
+                      :rules="[(v) => !!v || 'กรุณาป้อนรหัสไปรษณีย์']"
                       variant="outlined"
                       density="compact"
                     ></v-text-field>
@@ -161,14 +217,20 @@ import axios from "axios";
 import { apiUrl } from "../constants";
 
 export default {
-  name: "DepartmentPage",
+  name: "CustomerPage",
   async mounted() {
-    await this.getDepartment();
+    await this.getCustomer();
   },
   data: () => ({
-    department: [],
-    departmentData: {
-      departmentName: "",
+    customer: [],
+    customerData: {
+      customerName: "",
+      contactName: "",
+      address: "",
+      city: "",
+      postalCode: "",
+      country: "",
+      phone: "",
     },
     headers: [
       {
@@ -177,8 +239,28 @@ export default {
         sortable: false,
       },
       {
-        key: "departmentName",
-        title: "ชื่อแผนก",
+        key: "customerName",
+        title: "ชื่อลูกค้า",
+      },
+      {
+        key: "contactName",
+        title: "ชื่อผู้ติดต่อ",
+      },
+      {
+        key: "address",
+        title: "ที่อยู่",
+      },
+      {
+        key: "city",
+        title: "เมือง",
+      },
+      {
+        key: "postalCode",
+        title: "รหัสไปรษณีย์",
+      },      
+      {
+        key: "phone",
+        title: "โทรศัพท์",
       },
       {
         title: "",
@@ -194,17 +276,23 @@ export default {
     search: "",
   }),
   methods: {
-    async getDepartment() {
+    async getCustomer() {
       try {
-        let result = await axios.get(apiUrl + "/department");
-        this.department = result.data;
+        let result = await axios.get(apiUrl + "/customer");
+        this.customer = result.data;
       } catch (error) {
         console.log(error);
       }
     },
-    insertDepartment() {
+    insertCustomer() {
       this.editMode = false;
-      this.departmentData.departmentName = "";
+      this.customerData.customerName = "";
+      this.customerData.contactName = "";
+      this.customerData.address = "";
+      this.customerData.city = "";
+      this.customerData.postalCode = "";
+      this.customerData.country = "Thailand";
+      this.customerData.phone = "";
       this.dialog = true;
     },
     async onSave() {
@@ -214,8 +302,8 @@ export default {
         if (this.editMode == false) {
           try {            
             const result = await axios.post(
-              apiUrl + "/department/create",
-              this.departmentData
+              apiUrl + "/customer/create",
+              this.customerData
             );
           } catch (error) {
             console.log(error);
@@ -223,21 +311,21 @@ export default {
         } else {
           try {            
             await axios.put(
-              apiUrl + "/department/update/" + this.departmentData.departmentId,
-              this.departmentData
+              apiUrl + "/customer/update/" + this.customerData.customerId,
+              this.customerData
             );
           } catch (error) {
             console.log(error);
           }
         }
-        await this.getDepartment();
+        await this.getCustomer();
         this.dialog = false;
       }
     },
     async editItem(id) {
       try {
-        let result = await axios.get(apiUrl + "/department/by-id/" + id);
-        this.departmentData = result.data;
+        let result = await axios.get(apiUrl + "/customer/by-id/" + id);
+        this.customerData = result.data;
         this.editMode = true;
         this.dialog = true;
       } catch (error) {
@@ -251,11 +339,11 @@ export default {
     },
     async deleteItemConfirm() {
       try {        
-        await axios.delete(apiUrl + "/department/delete/" + this.deleteId);
+        await axios.delete(apiUrl + "/customer/delete/" + this.deleteId);
       } catch (error) {
         console.log(error);
       }
-      await this.getDepartment();
+      await this.getCustomer();
       this.dialogDelete = false;
     },
   },

@@ -33,12 +33,12 @@
         <template
           v-slot:headers="{ columns, isSorted, getSortIcon, toggleSort }"
         >
-          <tr class="bg-blue-lighten-5 fontPrompt fontSize14">
+          <tr class="bg-blue-lighten-5">
             <template v-for="column in columns" :key="column.key">
               <th>
                 <div class="d-flex align-center">
                   <span
-                    class="me-2 cursor-pointer"
+                    class="me-2 cursor-pointer text-blue-darken-4 fontPrompt fontSize14"
                     @click="toggleSort(column)"
                     v-text="column.title"
                   ></span>
@@ -58,9 +58,9 @@
             <td>
               <v-icon
                 size="small"
-                class="me-2"
+                class="ml-3"
                 @click="editItem(item.employeeId)"
-                color="blue"
+                color="blue"                
               >
                 mdi-pencil
               </v-icon>
@@ -117,7 +117,7 @@
       <!------------------------- dialog ADD / EDIT --------------------------->
       <v-dialog v-model="dialog" persistent max-width="800px">
         <v-card>
-          <v-card-title>
+          <v-card-title class="bg-blue-lighten-4 text-center">
             <span class="fontPromptBold fontSize24 text-blue-darken-3"
               >ข้อมูลพนักงาน</span
             >
@@ -192,7 +192,7 @@
                   <v-col cols="11">
                     <v-text-field
                       v-model="employeeData.empPicture"
-                      label="รูปภาพพนักงาน"                      
+                      label="รูปภาพพนักงาน"
                       variant="outlined"
                       density="compact"
                       disabled
@@ -244,10 +244,10 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="green darken-1" class="mr-3" text @click="onSave()">
+            <v-btn color="green darken-1" class="mr-3" variant="tonal" text @click="onSave()">
               บันทึก <v-icon icon="mdi-content-save" end></v-icon
             ></v-btn>
-            <v-btn color="red darken-1" text @click="dialog = false">
+            <v-btn color="red darken-1" variant="tonal" text @click="dialog = false">
               ปิด <v-icon icon="mdi-close" end></v-icon
             ></v-btn>
           </v-card-actions>
@@ -424,12 +424,19 @@ export default {
       // console.log("Form valid:", valid);
 
       if (valid) {
+        // Add New Record
         if (this.editMode == false) {
           try {
             this.employeeData.empPicture = null;
-            this.employeeData.imageData = this.resizedBase64;
-            this.employeeData.imageSave = this.isImageSave;
-            const result = await axios.post(
+            if (this.resizedBase64) {
+              this.employeeData.imageData = this.resizedBase64;
+              this.employeeData.imageSave = this.isImageSave;
+            } else {
+              this.employeeData.imageData = null;
+              this.employeeData.imageSave = false;
+            }
+
+            await axios.post(
               apiUrl + "/employee/createpic",
               this.employeeData
             );
@@ -438,13 +445,21 @@ export default {
             console.log(error);
           }
         } else {
+          // Edit Record
           try {
-            this.employeeData.imageData = this.resizedBase64;
-            this.employeeData.imageSave = this.isImageSave;
+            if (this.resizedBase64) {
+              this.employeeData.imageData = this.resizedBase64;
+              this.employeeData.imageSave = this.isImageSave;
+            } else {
+              this.employeeData.imageData = null;
+              this.employeeData.imageSave = false;
+            }
             await axios.put(
-              apiUrl + "/department/update/" + this.departmentData.departmentId,
-              this.departmentData
+              apiUrl + "/employee/updatepic/" +
+                this.employeeData.employeeId,
+              this.employeeData
             );
+            // console.log(result.data);            
           } catch (error) {
             console.log(error);
           }
@@ -460,14 +475,16 @@ export default {
         if (!!!this.employeeData.empPicture) {
           this.employeeData.empPicture = null;
           this.resizedBase64 = null;
+          this.isImageSave = false;
         } else {
           // this.employeeData.empPicture =
           //   imageUrl + this.employeeData.empPicture;
           this.resizedBase64 = await this.imageUrlToBase64(
             imageUrl + this.employeeData.empPicture
           );
+          this.isImageSave = false;
         }
-        console.log(this.employeeData);
+        // console.log(this.employeeData);
         this.editMode = true;
         this.dialog = true;
       } catch (error) {
@@ -572,7 +589,7 @@ export default {
       // เริ่มอ่านไฟล์
       reader.readAsDataURL(file);
       this.isImageSave = true;
-    },   
+    },
     async imageUrlToBase64(url) {
       return new Promise((resolve, reject) => {
         const img = new Image();
@@ -598,8 +615,5 @@ export default {
 };
 </script>
 
-<style scoped>
-.v-data-table >>> .v-data-table-header {
-  background-color: #f3a6a6 !important; /* Replace with your desired color */
-}
+<style>
 </style>

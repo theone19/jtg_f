@@ -3,7 +3,7 @@
     <v-card color="#FFFFFF">
       
       <v-card-title class="d-flex align-center pe-2">
-        <v-icon icon="mdi-account-outline"></v-icon> &nbsp; ข้อมูลแผนก
+        <v-icon icon="mdi-account-outline"></v-icon> &nbsp; ประเภทโลหะ
 
         <v-spacer></v-spacer>
 
@@ -18,7 +18,7 @@
           single-line
         ></v-text-field>
 
-        <v-btn class="bg-green mr-3 ml-5" @click="insertDepartment()"
+        <v-btn class="bg-green mr-3 ml-5" @click="insertMetalType()"
           >New <v-icon icon="mdi-plus" end></v-icon
         ></v-btn>
       </v-card-title>
@@ -27,7 +27,7 @@
 
       <v-data-table
         :headers="headers"
-        :items="department"
+        :items="metalType"
         :search="search"
         class="elevation-10"
       >
@@ -68,18 +68,18 @@
               <v-icon
                 size="small"
                 class="ml-3"
-                @click="editItem(item.departmentId)"
+                @click="editItem(item.metalTypeId)"
                 color="blue"
               >
                 mdi-pencil
               </v-icon>
             </td>
-            <td>{{ item.departmentName }}</td>
+            <td>{{ item.metalTypeName }}</td>
             <!-- <td>Test</td> -->
             <td>
               <v-icon
                 size="small"
-                @click="deleteItem(item.departmentId, item.departmentName)"
+                @click="deleteItem(item.metalTypeId, item.metalTypeName)"
                 color="red"
               >
                 mdi-trash-can-outline
@@ -94,7 +94,7 @@
         <v-card>
           <v-card-title class="bg-blue-lighten-4 text-center">
             <span class="fontPromptBold fontSize24 text-blue-darken-3"
-              >ข้อมูลแผนก</span
+              >ข้อมูลประเภทโลหะ</span
             >
           </v-card-title>
           <v-card-text class="mt-2">
@@ -103,9 +103,9 @@
                 <v-row>
                   <v-col>
                     <v-text-field
-                      v-model="departmentData.departmentName"
-                      label="ชื่อแผนก"
-                      :rules="[(v) => !!v || 'กรุณาป้อนชื่อแผนก']"
+                      v-model="metalTypeData.metalTypeName"
+                      label="ชื่อประเภทโลหะ"
+                      :rules="[(v) => !!v || 'กรุณาป้อนชื่อประเภทโลหะ']"
                       variant="outlined"
                       density="compact"
                     ></v-text-field>
@@ -161,14 +161,14 @@ import axios from "axios";
 import { apiUrl } from "../constants";
 
 export default {
-  name: "DepartmentPage",
+  name: "MetalTypePage",
   async mounted() {
-    await this.getDepartment();
+    await this.getMetalType();
   },
   data: () => ({
-    department: [],
-    departmentData: {
-      departmentName: "",
+    metalType: [],
+    metalTypeData: {
+      metalTypeName: "",
     },
     headers: [
       {
@@ -177,8 +177,8 @@ export default {
         sortable: false,
       },
       {
-        key: "departmentName",
-        title: "ชื่อแผนก",
+        key: "metalTypeName",
+        title: "ประเภทโลหะ",
       },
       {
         title: "",
@@ -194,17 +194,17 @@ export default {
     search: "",
   }),
   methods: {
-    async getDepartment() {
+    async getMetalType() {
       try {
-        let result = await axios.get(apiUrl + "/department");
-        this.department = result.data;
+        let result = await axios.get(apiUrl + "/metal-type");
+        this.metalType = result.data;
       } catch (error) {
         console.log(error);
       }
     },
-    insertDepartment() {
+    insertMetalType() {
       this.editMode = false;
-      this.departmentData.departmentName = "";
+      this.metalTypeData.metalTypeName = "";
       this.dialog = true;
     },
     async onSave() {
@@ -214,8 +214,8 @@ export default {
         if (this.editMode == false) {
           try {            
             const result = await axios.post(
-              apiUrl + "/department/create",
-              this.departmentData
+              apiUrl + "/metal-type/create",
+              this.metalTypeData
             );
           } catch (error) {
             console.log(error);
@@ -223,21 +223,21 @@ export default {
         } else {
           try {            
             await axios.put(
-              apiUrl + "/department/update/" + this.departmentData.departmentId,
-              this.departmentData
+              apiUrl + "/metal-type/update/" + this.metalTypeData.metalTypeId,
+              this.metalTypeData
             );
           } catch (error) {
             console.log(error);
           }
         }
-        await this.getDepartment();
+        await this.getMetalType();
         this.dialog = false;
       }
     },
     async editItem(id) {
       try {
-        let result = await axios.get(apiUrl + "/department/by-id/" + id);
-        this.departmentData = result.data;
+        let result = await axios.get(apiUrl + "/metal-type/by-id/" + id);
+        this.metalTypeData = result.data;
         this.editMode = true;
         this.dialog = true;
       } catch (error) {
@@ -251,11 +251,11 @@ export default {
     },
     async deleteItemConfirm() {
       try {        
-        await axios.delete(apiUrl + "/department/delete/" + this.deleteId);
+        await axios.delete(apiUrl + "/metal-type/delete/" + this.deleteId);
       } catch (error) {
         console.log(error);
       }
-      await this.getDepartment();
+      await this.getMetalType();
       this.dialogDelete = false;
     },
   },
