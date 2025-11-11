@@ -189,17 +189,28 @@
                   </v-col>
                 </v-row>
                 <v-row>
-                  <v-col>
-                    <v-file-input
+                  <v-col cols="11">
+                    <v-text-field
                       v-model="employeeData.empPicture"
+                      label="รูปภาพพนักงาน"                      
+                      variant="outlined"
+                      density="compact"
+                      disabled
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="1">
+                    <v-file-input
+                      v-model="originalImageFile"
                       label="เลือกรูปภาพพนักงาน"
                       accept="image/png, image/jpeg, image/gif"
                       prepend-icon="mdi-camera"
                       variant="outlined"
                       density="compact"
+                      hide-input
                       :disabled="isProcessing"
                       :loading="isProcessing"
                       @change="handleFileUpload"
+                      class="mt-2"
                     ></v-file-input>
                   </v-col>
                 </v-row>
@@ -355,6 +366,7 @@ export default {
     originalImageFile: null,
     originalImageUrl: null,
     resizedBase64: null,
+    isImageSave: false,
     // STATE เพิ่มใหม่: สำหรับ Progress
     isProcessing: false, // สถานะว่ากำลังประมวลผลไฟล์หรือไม่
     uploadProgress: 0, // เปอร์เซ็นต์ความคืบหน้า (0-100)
@@ -402,7 +414,9 @@ export default {
       this.employeeData.remarks = "";
       this.employeeData.isWorking = true;
       this.employeeData.empPicture = null;
+      this.originalImageFile = null;
       this.resizedBase64 = null;
+      this.isImageSave = false;
       this.dialog = true;
     },
     async onSave() {
@@ -414,6 +428,7 @@ export default {
           try {
             this.employeeData.empPicture = null;
             this.employeeData.imageData = this.resizedBase64;
+            this.employeeData.imageSave = this.isImageSave;
             const result = await axios.post(
               apiUrl + "/employee/createpic",
               this.employeeData
@@ -424,6 +439,8 @@ export default {
           }
         } else {
           try {
+            this.employeeData.imageData = this.resizedBase64;
+            this.employeeData.imageSave = this.isImageSave;
             await axios.put(
               apiUrl + "/department/update/" + this.departmentData.departmentId,
               this.departmentData
@@ -472,11 +489,13 @@ export default {
       this.dialogDelete = false;
     },
     handleFileUpload() {
-      const file = this.employeeData.empPicture;
+      // const file = this.employeeData.empPicture;
+      const file = this.originalImageFile;
 
       if (!file) {
-        this.employeeData.empPicture = null;
+        this.originalImageFile = null;
         this.resizedBase64 = null;
+        this.isImageSave = false;
         return;
       }
 
@@ -552,6 +571,7 @@ export default {
 
       // เริ่มอ่านไฟล์
       reader.readAsDataURL(file);
+      this.isImageSave = true;
     },   
     async imageUrlToBase64(url) {
       return new Promise((resolve, reject) => {
