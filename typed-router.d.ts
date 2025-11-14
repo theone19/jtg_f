@@ -25,6 +25,7 @@ declare module 'vue-router/auto-routes' {
     '/dashboard': RouteRecordInfo<'/dashboard', '/dashboard', Record<never, never>, Record<never, never>>,
     '/department': RouteRecordInfo<'/department', '/department', Record<never, never>, Record<never, never>>,
     '/employee': RouteRecordInfo<'/employee', '/employee', Record<never, never>, Record<never, never>>,
+    '/joborder': RouteRecordInfo<'/joborder', '/joborder', Record<never, never>, Record<never, never>>,
     '/login': RouteRecordInfo<'/login', '/login', Record<never, never>, Record<never, never>>,
     '/metalType': RouteRecordInfo<'/metalType', '/metalType', Record<never, never>, Record<never, never>>,
     '/productType': RouteRecordInfo<'/productType', '/productType', Record<never, never>, Record<never, never>>,
@@ -68,6 +69,10 @@ declare module 'vue-router/auto-routes' {
     }
     'src/pages/employee.vue': {
       routes: '/employee'
+      views: never
+    }
+    'src/pages/joborder.vue': {
+      routes: '/joborder'
       views: never
     }
     'src/pages/login.vue': {
