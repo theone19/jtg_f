@@ -1,6 +1,6 @@
 <template>
   <v-container class="pa-5" fluid>
-    <v-card color="#FFFFFF" style="height: 89vh;">
+    <v-card color="#FFFFFF" style="height: 89vh">
       <v-card-title class="d-flex align-center pe-2">
         <v-icon icon="mdi-account-outline"></v-icon> &nbsp; Job Order
 
@@ -25,8 +25,130 @@
 
       <v-row>
         <v-col v-for="item in jobOrder" :key="item.jobOrderId" cols="2">
-          <v-card class="bg-blue-lighten-5 mt-4 ml-4 mb-4" outlined hover>
-            <v-card-title class="fontSarabun" style="font-size: 12px;">{{ item.jobOrderNumber }}</v-card-title>
+          <v-card class="bg-blue-lighten-5 mt-4 mr-n2 ml-4 mb-4" outlined hover>
+            <v-card-title
+              class="fontSarabun bg-blue"
+              style="font-size: 12px"
+              @click="editItem(item.jobOrderId)"
+            >
+              <v-row>
+                <v-col> {{ item.jobOrderNumber }} </v-col>
+                <v-col class="text-yellow text-right">
+                  {{ item.customerName }}
+                </v-col>
+              </v-row>
+            </v-card-title>
+            <v-card-text class="fontSarabun" style="font-size: 12px">
+              <v-row class="mt-0 py-0">
+                <v-col cols="4" class="pa-2"> เลขที่: </v-col>
+                <v-col cols="8" class="pa-2">
+                  {{ item.customerBillNumber + "/" + item.customerBillItemNo }}
+                </v-col>
+              </v-row>
+              <v-row class="mt-n3 py-0">
+                <v-col cols="4" class="pa-2"> วันที่สั่ง: </v-col>
+                <v-col cols="8" class="pa-2">
+                  {{ new Date(item.jobDate).toLocaleDateString("en-GB") }}
+                </v-col>
+              </v-row>
+              <v-row class="mt-n3 py-0">
+                <v-col cols="4" class="pa-2"> ประเภท: </v-col>
+                <v-col cols="8" class="pa-2">
+                  {{ item.productTypeName + " | " + item.metalTypeName }}
+                </v-col>
+              </v-row>
+              <v-row class="mt-n3 py-0">
+                <v-col cols="4" class="pa-2"> จำนวน: </v-col>
+                <v-col cols="8" class="pa-2">
+                  {{
+                    item.qty +
+                    " " +
+                    item.unitTypeName +
+                    (item.weight > 0 ? " | " + item.weight + " กรัม" : "")
+                  }}
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="8">
+                  <v-icon
+                    color="purple-darken-2"
+                    icon="mdi-sticker-text-outline"
+                    size="small"
+                    @click="printSticker(item.jobOrderId)"
+                  ></v-icon>
+                  <v-icon
+                    color="orange-darken-2"
+                    icon="mdi-arrow-up-bold-box-outline"
+                    size="small"
+                    class="ml-3"
+                  ></v-icon>                                    
+                </v-col>
+                <v-col cols="4">
+                  <v-avatar v-if="false" size="38">
+                    <v-img
+                      alt="John"
+                      src="https://cdn.vuetifyjs.com/images/john.jpg"
+                    ></v-img>
+                  </v-avatar>
+                </v-col>
+              </v-row>
+              <!-- <v-row>
+                <v-col>
+                  เลขที่บิลลูกค้า
+                </v-col>
+                <v-col>
+                  {{ item.customerBillNumber }}
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col>
+                  กำหนดเสร็จ
+                </v-col>
+                <v-col>
+                  {{ new Date(item.dueDate).toLocaleDateString() }}
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col>
+                  ประเภทสินค้า
+                </v-col>
+                <v-col>
+                  {{ item.productTypeName }}
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col>
+                  ประเภทโลหะ
+                </v-col>
+                <v-col>
+                  {{ item.metalTypeName }}
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col>
+                  จำนวน
+                </v-col>
+                <v-col>
+                  {{ item.qty }} {{ item.unitTypeName }}
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col>
+                  น้ำหนัก
+                </v-col>
+                <v-col>
+                  {{ item.weight }} กรัม
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col>
+                  รายละเอียดงาน
+                </v-col>
+                <v-col>
+                  {{ item.jobDescription }}
+                </v-col>
+              </v-row> -->
+            </v-card-text>
           </v-card>
         </v-col>
       </v-row>
@@ -230,6 +352,7 @@
 <script>
 import axios from "axios";
 import { apiUrl } from "../constants";
+import { fa } from "vuetify/locale";
 
 export default {
   name: "JobOrderPage",
@@ -289,7 +412,7 @@ export default {
     },
     async getJobOrder() {
       try {
-        let result = await axios.get(apiUrl + "/job-order");
+        let result = await axios.get(apiUrl + "/job-order/all");
         this.jobOrder = result.data;
         console.log(this.jobOrder);
       } catch (error) {
@@ -299,22 +422,22 @@ export default {
     insertJobOrder() {
       this.editMode = false;
       this.jobOrderData = {
-        jobOrderNumber: '',
+        jobOrderNumber: "",
         customerId: null,
         jobDate: new Date(),
-        customerBillNumber: '',
+        customerBillNumber: "",
         customerBillItemNo: null,
         productTypeId: null,
         metalTypeId: null,
         qty: 1,
         unitTypeId: null,
         weight: 0.0,
-        jobDescription: '',
+        jobDescription: "",
         pricePerUnit: 0,
         dueDate: new Date(),
         billPicture: null,
-        status: '',
-        remarks: '',
+        status: "",
+        remarks: "",
       };
       this.dialog = true;
     },
@@ -322,7 +445,7 @@ export default {
       const { valid } = await this.$refs.form1.validate();
 
       if (valid) {
-        if (this.editMode == false) {          
+        if (this.editMode == false) {
           // convert string data
           this.jobOrderData.customerBillItemNo = Number(
             this.jobOrderData.customerBillItemNo
@@ -343,6 +466,13 @@ export default {
           }
         } else {
           try {
+            // convert string data
+            this.jobOrderData.customerBillItemNo = Number(
+              this.jobOrderData.customerBillItemNo
+            );
+            this.jobOrderData.qty = Number(this.jobOrderData.qty);
+            this.jobOrderData.weight = Number(this.jobOrderData.weight);
+
             await axios.put(
               apiUrl + "/job-order/update/" + this.jobOrderData.jobOrderId,
               this.jobOrderData
@@ -378,6 +508,9 @@ export default {
       }
       await this.getJobOrder();
       this.dialogDelete = false;
+    },
+    printSticker(id) {
+      window.open(apiUrl + "/job-order/print-sticker/" + id, "_blank");
     },
   },
 };
