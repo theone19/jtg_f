@@ -84,7 +84,7 @@
                   ></v-icon>
                 </v-col>
                 <v-col cols="4">
-                  <v-avatar v-if="false" size="38">
+                  <v-avatar v-if="true" size="38">
                     <v-img
                       alt="John"
                       src="https://cdn.vuetifyjs.com/images/john.jpg"

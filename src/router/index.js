@@ -69,6 +69,11 @@ const router = createRouter({
           name: "joborder",
           component: () => import("@/pages/joborder.vue"),
         },
+        {
+          path: "/jobstatus",
+          name: "jobstatus",
+          component: () => import("@/pages/jobstatus.vue"),
+        },
       ],
     },
   ],
